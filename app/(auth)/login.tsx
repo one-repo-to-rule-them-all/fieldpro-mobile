@@ -27,8 +27,11 @@ export default function LoginScreen() {
     try {
       await login(email.trim().toLowerCase(), password);
     } catch (err: any) {
+      // Backend wraps errors as { error: { message, code } } — not { detail }
       const message =
-        err?.response?.data?.detail ?? "Check your credentials and try again.";
+        err?.response?.data?.error?.message ??
+        err?.response?.data?.detail ??
+        "Check your credentials and try again.";
       Alert.alert("Login failed", message);
     } finally {
       setLoading(false);

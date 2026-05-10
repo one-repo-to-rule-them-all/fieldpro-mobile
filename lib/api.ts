@@ -98,7 +98,7 @@ api.interceptors.response.use(
 
 export const authApi = {
   login: async (email: string, password: string) => {
-    // ?client=mobile tells the backend to include refresh_token in the JSON body
+    // ?client=mobile tells the backend to include refresh_token in the JSON body.
     const { data } = await axios.post(
       `${BASE_URL}/api/v1/auth/login?client=mobile`,
       { email, password }
@@ -108,7 +108,10 @@ export const authApi = {
 
   logout: async () => {
     try {
-      await api.post("/auth/logout");
+      const refreshToken = await tokenStorage.getRefresh();
+      // Pass refresh_token so the backend can revoke it server-side.
+      // tokenStorage.clear() runs regardless so the device is always logged out.
+      await api.post("/auth/logout", refreshToken ? { refresh_token: refreshToken } : {});
     } finally {
       await tokenStorage.clear();
     }
@@ -124,26 +127,26 @@ export const authApi = {
 
 export const workOrdersApi = {
   list: async (params?: {
-    status?: string;
+    status?: string | string[];
     page?: number;
     page_size?: number;
   }) => {
-    const { data } = await api.get("/work-orders", { params });
+    const { data } = await api.get("/work-orders/", { params });
     return data;
   },
 
   get: async (id: string) => {
-    const { data } = await api.get(`/work-orders/${id}`);
+    const { data } = await api.get(`/work-orders/${id}/`);
     return data;
   },
 
   checkIn: async (id: string, coords: { latitude: number; longitude: number }) => {
-    const { data } = await api.post(`/work-orders/${id}/check-in`, coords);
+    const { data } = await api.post(`/work-orders/${id}/checkin/`, coords);
     return data;
   },
 
   checkOut: async (id: string, coords: { latitude: number; longitude: number }) => {
-    const { data } = await api.post(`/work-orders/${id}/check-out`, coords);
+    const { data } = await api.post(`/work-orders/${id}/checkout/`, coords);
     return data;
   },
 };
@@ -151,11 +154,16 @@ export const workOrdersApi = {
 // ─── Task endpoints ───────────────────────────────────────────────────────────
 
 export const tasksApi = {
+  // workOrderId required — backend route is /work-orders/{workOrderId}/tasks/{taskId}
   update: async (
-    id: string,
+    workOrderId: string,
+    taskId: string,
     payload: { status: "completed" | "pending" | "skipped"; skip_reason?: string }
   ) => {
-    const { data } = await api.patch(`/tasks/${id}`, payload);
+    const { data } = await api.patch(
+      `/work-orders/${workOrderId}/tasks/${taskId}/`,
+      payload
+    );
     return data;
   },
 };

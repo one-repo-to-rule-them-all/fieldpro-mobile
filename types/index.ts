@@ -71,8 +71,8 @@ export interface WorkOrder {
   location_address?: string;
   crew_id?: string;
   assigned_to?: string;
-  tasks: Task[];
-  check_ins: CheckIn[];
+  tasks?: Task[];
+  check_ins?: CheckIn[];
   is_overdue: boolean;
   recurrence_rule?: string;
   is_recurring: boolean;
