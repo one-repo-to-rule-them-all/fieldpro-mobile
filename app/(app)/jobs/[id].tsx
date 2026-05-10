@@ -84,7 +84,7 @@ export default function JobDetailScreen() {
     );
   }
 
-  const activeCheckIn = workOrder.check_ins.find((c) => !c.checked_out_at);
+  const activeCheckIn = workOrder.check_ins?.find((c) => !c.checked_out_at);
 
   return (
     <SafeAreaView className="flex-1 bg-surface" edges={["top"]}>
@@ -111,15 +111,17 @@ export default function JobDetailScreen() {
           {workOrder.location_address && (
             <Text className="text-slate-500 text-xs">{workOrder.location_address}</Text>
           )}
-          <Text className="text-slate-500 text-xs mt-2">
-            {workOrder.scheduled_start_time
-              ? `${format(parseISO(workOrder.scheduled_start_time), "MMM d · h:mm a")}${
-                  workOrder.scheduled_end_time
-                    ? ` – ${format(parseISO(workOrder.scheduled_end_time), "h:mm a")}`
-                    : ""
-                }`
-              : format(parseISO(workOrder.scheduled_date), "MMM d, yyyy")}
-          </Text>
+          {(workOrder.scheduled_start_time || workOrder.scheduled_date) && (
+            <Text className="text-slate-500 text-xs mt-2">
+              {workOrder.scheduled_start_time
+                ? `${format(parseISO(workOrder.scheduled_start_time), "MMM d · h:mm a")}${
+                    workOrder.scheduled_end_time
+                      ? ` – ${format(parseISO(workOrder.scheduled_end_time), "h:mm a")}`
+                      : ""
+                  }`
+                : format(parseISO(workOrder.scheduled_date!), "MMM d, yyyy")}
+            </Text>
+          )}
           {workOrder.description && (
             <Text className="text-slate-400 text-sm mt-3 leading-5">
               {workOrder.description}
@@ -138,7 +140,7 @@ export default function JobDetailScreen() {
         />
 
         {/* Tasks */}
-        {workOrder.tasks.length > 0 && (
+        {workOrder.tasks?.length > 0 && (
           <View className="px-4 mt-4">
             <Text className="text-slate-400 text-xs font-semibold uppercase tracking-widest mb-3">
               Tasks

@@ -15,9 +15,9 @@ export const workOrderKeys = {
 
 export function useMyJobs() {
   return useQuery<PaginatedResponse<WorkOrder>>({
-    queryKey: workOrderKeys.list({ status: "scheduled,in_progress" }),
+    queryKey: workOrderKeys.list({ status: ["scheduled", "in_progress"] }),
     queryFn: () =>
-      workOrdersApi.list({ status: "scheduled,in_progress", page_size: 50 }),
+      workOrdersApi.list({ status: ["scheduled", "in_progress"], page_size: 50 }),
     staleTime: 60_000,
   });
 }
@@ -83,7 +83,7 @@ export function useUpdateTask(workOrderId: string) {
       taskId: string;
       status: "completed" | "pending" | "skipped";
       skip_reason?: string;
-    }) => tasksApi.update(taskId, { status, skip_reason }),
+    }) => tasksApi.update(workOrderId, taskId, { status, skip_reason }),
     onSuccess: (updatedTask: Task) => {
       // Optimistically patch the task inside the cached work order
       queryClient.setQueryData<WorkOrder>(
@@ -92,7 +92,7 @@ export function useUpdateTask(workOrderId: string) {
           if (!old) return old;
           return {
             ...old,
-            tasks: old.tasks.map((t) =>
+            tasks: old.tasks?.map((t) =>
               t.id === updatedTask.id ? updatedTask : t
             ),
           };

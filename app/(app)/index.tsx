@@ -44,7 +44,7 @@ function JobCard({ item }: { item: WorkOrder }) {
             ? format(parseISO(item.scheduled_start_time), "h:mm a")
             : format(parseISO(item.scheduled_date), "MMM d")}
         </Text>
-        {item.tasks.length > 0 && (
+        {item.tasks?.length > 0 && (
           <Text className="text-slate-500 text-xs ml-auto">
             {item.tasks.filter((t) => t.status === "completed").length}/
             {item.tasks.length} tasks
